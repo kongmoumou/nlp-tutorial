@@ -1,7 +1,9 @@
 from typing import List
 from collections import OrderedDict
 
-from prenlp.tokenizer import SentencePiece
+import nltk
+import json
+# from prenlp.tokenizer import SentencePiece
 
 class Tokenizer:
     def __init__(self, tokenizer, vocab_file: str,
@@ -17,18 +19,23 @@ class Tokenizer:
         self.vocab = OrderedDict()
         self.ids_to_tokens = OrderedDict()
 
-        # Build vocab and ids_to_tokens
+        # load json from vocab_file
         with open(vocab_file, 'r', encoding='utf-8') as reader:
-            for i, line in enumerate(reader.readlines()):
-                token =line.split()[0]
-                self.vocab[token] = i
+            self.vocab = json.load(reader)
+
+        # Build vocab and ids_to_tokens
+        # with open(vocab_file, 'r', encoding='utf-8') as reader:
+        #     for i, line in enumerate(reader.readlines()):
+        #         token =line.split()[0]
+        #         self.vocab[token] = i
         for token, id in self.vocab.items():
             self.ids_to_tokens[id] = token
 
     def tokenize(self, text: str) -> List[str]:
         """Tokenize given text.
         """
-        return self.tokenizer(text)
+        return nltk.word_tokenize(text.strip())
+        # return self.tokenizer(text)
 
     def convert_token_to_id(self, token: str) -> int:
         """Convert a token (str) in an id (integer) using the vocab.
@@ -81,16 +88,18 @@ class Tokenizer:
         return self.convert_token_to_id(self.eos_token)
 
 class PretrainedTokenizer(Tokenizer):
-    def __init__(self, pretrained_model: str, vocab_file: str,
-                 pad_token: str = '[PAD]',
-                 unk_token: str = '[UNK]',
-                 bos_token: str = '[BOS]',
-                 eos_token: str = '[EOS]'):
-        tokenizer = SentencePiece.load(pretrained_model)
+    def __init__(self, pretrained_model : str, vocab_file: str,
+                 pad_token: str = '<pad>',
+                 unk_token: str = '<unk>',
+                 bos_token: str = '<s>',
+                 eos_token: str = '</s>'):
+        # tokenizer = SentencePiece.load(pretrained_model)
+        tokenizer = None
 
         super(PretrainedTokenizer, self).__init__(tokenizer, vocab_file, pad_token, unk_token, bos_token, eos_token)
 
     def detokenize(self, tokens: List[str]) -> str:
         """Detokenize given tokens.
         """
-        return self.tokenizer.detokenize(tokens)
+        return ' '.join(tokens)
+        # return self.tokenizer.detokenize(tokens)

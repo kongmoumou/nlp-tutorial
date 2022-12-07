@@ -16,7 +16,9 @@ def main(args):
     model.eval()
 
     # Make input
-    text = 'Je ferai n\'importe quoi pour lui.'
+    # text = 'Je ferai n\'importe quoi pour lui.'
+    text = 'convert the given url string to its corresponding file'
+    # text = 'instantiate an object given its class , the parameters and signature of its constructor the call returns a reference to the newly created object'
     tokens = tokenizer_src.tokenize(text)
     tokens = tokens[:args.max_seq_len]
     
@@ -51,12 +53,12 @@ if __name__ == '__main__':
 
     parser.add_argument('--model',               required=True,            type=str, help='transformer model to load')
 
-    parser.add_argument('--vocab_file_src',          default='fra.vocab',     type=str, help='vocabulary path')
-    parser.add_argument('--vocab_file_tgt',          default='eng.vocab',     type=str, help='vocabulary path')
+    parser.add_argument('--vocab_file_src',          default='data/vocab.desc.json',     type=str, help='vocabulary path')
+    parser.add_argument('--vocab_file_tgt',          default='data/vocab.apiseq.json',     type=str, help='vocabulary path')
     parser.add_argument('--pretrained_model_src',    default='fra.model',     type=str, help='pretrained sentencepiece model path. used only when tokenizer=\'sentencepiece\'')
     parser.add_argument('--pretrained_model_tgt',    default='eng.model',     type=str, help='pretrained sentencepiece model path. used only when tokenizer=\'sentencepiece\'')    
     # Input parameters
-    parser.add_argument('--max_seq_len',    default=80,  type=int,   help='the maximum size of the input sequence')
+    parser.add_argument('--max_seq_len',    default=50,  type=int,   help='the maximum size of the input sequence')
     parser.add_argument('--no_cuda',        action='store_true')
 
     args = parser.parse_args()

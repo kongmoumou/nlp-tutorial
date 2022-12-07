@@ -5,6 +5,8 @@ import torch.optim as optim
 
 from model import Transformer
 from optimization import ScheduledOptim
+from tqdm.auto import tqdm
+import time
 
 class Trainer:
     def __init__(self, args, train_loader, test_loader, tokenizer_src, tokenizer_tgt):
@@ -38,7 +40,8 @@ class Trainer:
         n_batches, n_samples = len(self.train_loader), len(self.train_loader.dataset)
         
         self.model.train()
-        for i, batch in enumerate(self.train_loader):
+        for i, batch in enumerate(tqdm(self.train_loader)):
+            # encoder_inputs, decoder_inputs, decoder_outputs = map(lambda x: torch.from_numpy(x).to(self.device), batch)
             encoder_inputs, decoder_inputs, decoder_outputs = map(lambda x: x.to(self.device), batch)
             # |encoder_inputs| : (batch_size, seq_len), |decoder_inputs| : (batch_size, seq_len-1), |decoder_outputs| : (batch_size, seq_len-1)
 
@@ -57,7 +60,8 @@ class Trainer:
             self.optimizer.step()
 
             if i % (n_batches//5) == 0 and i != 0:
-                print('Iteration {} ({}/{})\tLoss: {:.4f}\tlr: {:.4f}'.format(i, i, n_batches, losses/i, self.optimizer.get_current_lr))
+                # print('Iteration {} ({}/{})\tLoss: {:.4f}\tlr: {:.4f}'.format(i, i, n_batches, losses/i, self.optimizer.get_current_lr))
+                None
         
         print('Train Epoch: {}\t>\tLoss: {:.4f}'.format(epoch, losses/n_batches))
             
@@ -83,7 +87,8 @@ class Trainer:
         print('Valid Epoch: {}\t>\tLoss: {:.4f}'.format(epoch, losses/n_batches))
 
     def save(self, epoch, model_prefix='model', root='.model'):
-        path = Path(root) / (model_prefix + '.ep%d' % epoch)
+        time_str = time.strftime("%y-%m-%d_%H%M")
+        path = Path(root) / (model_prefix + '_' + time_str + '.ep%d' % epoch)
         if not path.parent.exists():
             path.parent.mkdir()
         
