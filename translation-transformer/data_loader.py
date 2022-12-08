@@ -31,8 +31,9 @@ class APIDataset(data.Dataset):
         self.desc_index = desc_table.get_node('/indices')[:]
         
         assert self.api_index.shape[0] == self.desc_index.shape[0], "inconsistent number of API sequences and NL descriptions!"
-        # self.data_len = self.api_index.shape[0]
-        self.data_len = 1000000
+        self.data_len = self.api_index.shape[0]
+        if 'train' in desc_file:
+            self.data_len = 1000000
         print("{} entries".format(self.data_len))
         
     def list2array(self, L, max_len, dtype=np.long, pad_idx=0):

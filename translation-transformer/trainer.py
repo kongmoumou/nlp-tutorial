@@ -9,7 +9,7 @@ from tqdm.auto import tqdm
 import time
 
 class Trainer:
-    def __init__(self, args, train_loader, test_loader, tokenizer_src, tokenizer_tgt):
+    def __init__(self, args, train_loader, test_loader, tokenizer_src, tokenizer_tgt, model_path):
         self.args = args
         self.train_loader = train_loader
         self.test_loader = test_loader
@@ -17,7 +17,6 @@ class Trainer:
         self.tgt_vocab_size = tokenizer_tgt.vocab_size
         self.pad_id = tokenizer_src.pad_token_id # pad_token_id in tokenizer_tgt.vocab should be the same with this.
         self.device = 'cuda' if torch.cuda.is_available() and not args.no_cuda else 'cpu'
-
         self.model = Transformer(src_vocab_size = self.src_vocab_size,
                                  tgt_vocab_size = self.tgt_vocab_size,
                                  seq_len        = args.max_seq_len,
@@ -26,7 +25,7 @@ class Trainer:
                                  n_heads        = args.n_attn_heads,
                                  p_drop         = args.dropout,
                                  d_ff           = args.ffn_hidden,
-                                 pad_id         = self.pad_id)
+                                 pad_id         = self.pad_id) if model_path == '' else torch.load(model_path)
         if args.multi_gpu:
             self.model = nn.DataParallel(self.model)
         self.model.to(self.device)

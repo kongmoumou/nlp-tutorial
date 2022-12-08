@@ -3,6 +3,26 @@ import torch
 
 from tokenization import Tokenizer, PretrainedTokenizer
 
+def infer(model, src_ids, tokenizer_tgt, max_seq_len=50, no_cuda=False):
+    device = 'cuda' if torch.cuda.is_available() and not no_cuda else 'cpu'
+    # model = torch.load(args.model).to(device)
+    # model.eval()
+    # src_ids = tokenizer_src.convert_tokens_to_ids(tokens)
+    # padding_length = args.max_seq_len - len(src_ids)
+    # src_ids = src_ids + ([tokenizer_src.pad_token_id] * padding_length)
+    # src_ids = torch.tensor(src_ids).unsqueeze(0).to(device)
+    tgt_ids = torch.tensor([tokenizer_tgt.bos_token_id]).unsqueeze(0).to(device)
+    # Inference
+    for i in range(max_seq_len):
+        outputs, encoder_attns, decoder_attns, enc_dec_attns = model(src_ids, tgt_ids)
+        output_token_id = outputs[:,-1,:].argmax(dim=-1).item()
+        
+        if output_token_id == tokenizer_tgt.eos_token_id:
+            break
+        else:
+            tgt_ids = torch.cat((tgt_ids, torch.tensor([output_token_id]).unsqueeze(0).to(device)), dim=-1)
+    return tgt_ids.cpu().numpy()
+
 def main(args):
     print(args)
     

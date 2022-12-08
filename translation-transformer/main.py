@@ -6,6 +6,8 @@ from tokenization import Tokenizer, PretrainedTokenizer
 from trainer import Trainer
 from data_loader import APIDataset
 
+import re
+
 def main(args):
     print(args)
 
@@ -25,10 +27,13 @@ def main(args):
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=True)
     
     # Build Trainer
-    trainer = Trainer(args, train_loader, test_loader, tokenizer_src, tokenizer_tgt)
+    trainer = Trainer(args, train_loader, test_loader, tokenizer_src, tokenizer_tgt, model_path=args.from_model)
+
+    # match ep(\d+) from args.from_model and covert to int
+    start_epoch = int(re.match(r'ep(\d+)', args.from_model).group(1)) + 1 if args.from_model != '' else 1
 
     # Train & Validate
-    for epoch in range(1, args.epochs+1):
+    for epoch in range(start_epoch, args.epochs+1):
         trainer.train(epoch)
         trainer.validate(epoch)
         trainer.save(epoch, args.output_model_prefix)
@@ -57,6 +62,8 @@ if __name__ == '__main__':
     parser.add_argument('--n_attn_heads',   default=4,    type=int,   help='the number of multi-head attention heads')
     parser.add_argument('--dropout',        default=0.1,  type=float, help='the residual dropout value')
     parser.add_argument('--ffn_hidden',     default=1024, type=int,   help='the dimension of the feedforward network')
+
+    parser.add_argument('--from-model',     default='',   type=str,   help='load last ckpt')
 
     args = parser.parse_args()
 
